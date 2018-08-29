@@ -1,13 +1,16 @@
 package zalora.twitsplit.ui.message;
 
-import android.text.TextUtils;
-
 import java.util.ArrayList;
 import java.util.List;
 
 public class MessageInteractor {
     public static final int MESSAGE_MAX_LENGTH = 50;
     public static final int EXTRA_PREF_LENGTH = 4;
+    public static final int ALL_MESSAGE_LIMIT = 500;
+
+    public static final String ERROR_EMPTY_MESSAGE = "The message is empty";
+    public static final String ERROR_LONG_MESSAGE = "The message is very long";
+    public static final String ERROR_LONG_PHASE_MESSAGE = "The message contains a span of non-whitespace characters longer than 50 characters";
 
     interface OnFinishedListener {
         void onFinished(String[] items);
@@ -15,7 +18,7 @@ public class MessageInteractor {
     }
 
     private static boolean isValid(String message) {
-        if (TextUtils.isEmpty(message)) {
+        if (message == null || message.length() == 0) {
             return false;
         }
 
@@ -47,17 +50,21 @@ public class MessageInteractor {
      * @throws Exception
      */
     public static String[] splitMessage(String message) throws Exception {
-        if (TextUtils.isEmpty(message)) {
-            throw new Exception("The message is empty");
+        if (message == null || message.length() == 0) {
+            throw new Exception(ERROR_EMPTY_MESSAGE);
         }
+
+        if (message.length() > ALL_MESSAGE_LIMIT) {
+            throw new Exception(ERROR_LONG_MESSAGE);
+        }
+
         if (!isValid(message)) {
-            throw new Exception("the message contains a span of non-whitespace characters longer than 50 characters");
+            throw new Exception(ERROR_LONG_PHASE_MESSAGE);
         }
         if (message.length() < MESSAGE_MAX_LENGTH) {
             return new String[]{message};
         }
 
-        // Todo: split and return
         List<String> msgChunks = new ArrayList<>();
 
         String[] chunks = message.split(" ");
